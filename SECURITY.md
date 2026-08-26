@@ -31,4 +31,3 @@ If secret material was exposed, do not paste it into an issue to prove the expos
 ## Dependency policy
 
 The direct third-party dependency is `cryptography`; its Windows dependencies `cffi` and `pycparser` are also pinned in `requirements.txt`. Review all three before changing a pin.
-
