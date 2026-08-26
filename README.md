@@ -4,6 +4,140 @@ Windows上でTechnocore用のEd25519 `did:key` を作り、秘密seedをWindows 
 
 > 非公式のコミュニティーツールです。FLOP Labs公式ツールではありません。利用しても `$FLOP` エアドロップの対象になる保証はありません。
 
+## 初心者はここから（Windows 10 / 11）
+
+ここでは、**どこを押すか・どこからコピーするか・何が出たら次へ進めるか**を順番に説明します。
+
+### A. ZIPを保存して展開する
+
+1. このGitHubページ上部の緑色の **Code** を押す
+2. 開いた白いメニューの一番下にある **Download ZIP** を押す
+3. エクスプローラーの **ダウンロード** を開く
+4. 保存されたZIPを右クリックして **すべて展開** を押す
+5. 次の画面でも **展開** を押す
+6. 展開された黄色いフォルダを開く
+7. 同じ名前のフォルダがもう1つ入っていたら、それも開く
+
+`flop_identity.py`、`README.md`、`requirements`、`SECURITY.md`が見えたら、正しいフォルダです。ファイルはまだ開きません。
+
+### B. そのフォルダからPowerShellを開く
+
+1. キーボードの `Ctrl` を押したまま `L` を1回押す
+2. フォルダ上部のアドレスが青く選ばれたことを確認する
+3. 何も消さず、そのまま `powershell` と入力する
+4. `Enter` を1回押す
+
+右上の検索欄には入力しません。
+
+青い画面または黒い画面が別ウィンドウで開き、行の先頭に`PS C:\...\technocore-safe-did-windows-main>`のような表示があれば成功です。この表示自体はコピーしません。
+
+### C. コードをコピーする場所
+
+コピー元は、**いま読んでいるこのGitHubページ**です。フォルダ内の`README.md`を開く必要はありません。
+
+下の①〜⑧には、灰色のコード欄が1つずつあります。各コード欄の右端にある **紙が2枚重なったボタン**を押すと、その1行だけがコピーされます。
+
+毎回、次の同じ操作をします。
+
+1. GitHubで、実行する番号のコピーボタンを押す
+2. PowerShellのウィンドウをクリックする
+3. `Ctrl`を押したまま`V`を1回押す
+4. GitHubと同じ1行が貼られたことを確認する
+5. `Enter`を1回押す
+6. `PS C:\...>`が再表示されるまで待つ
+7. GitHubへ戻り、次の番号のコピーボタンを押す
+
+**①〜⑧をまとめてコピーしません。必ず番号ごとに1行ずつ進めます。** 赤いエラー、`False`、入力を求める質問が出た場合は、次の番号へ進みません。
+
+### ① Python 3.12を確認
+
+右端のコピーボタンを押し、PowerShellへ貼ってEnterします。
+
+```powershell
+py -3.12 --version
+```
+
+`Python 3.12.x`と表示された場合だけ②へ進みます。
+
+`py`が見つからない場合はそこで止め、[python.orgのWindows向け公式ページ](https://www.python.org/downloads/windows/)からPython 3.12 64-bitを導入します。インストール画面では **Python Launcher** を有効にし、完了後にPowerShellを開き直します。
+
+### ② 正しい照合番号をPowerShellへ覚えさせる
+
+```powershell
+$expected = "9CDD6D1608DB3755FB249088F098B3A7916974470C6D4A107A14F521BAF03D06"
+```
+
+何も表示されず、`PS C:\...>`が戻れば③へ進みます。
+
+### ③ ダウンロードした本体が公開版と一致するか確認
+
+```powershell
+(Get-FileHash .\flop_identity.py).Hash -eq $expected
+```
+
+`True`と表示された場合だけ④へ進みます。`False`なら補助ツールを実行しません。
+
+### ④ この作業専用のPython環境を作る
+
+```powershell
+py -3.12 -m venv .venv
+```
+
+文字が表示されなくても、`PS C:\...>`が戻れば⑤へ進みます。
+
+### ⑤ 専用環境内のpipを更新
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+```
+
+文字が流れている間はPowerShellを閉じません。`PS C:\...>`が戻れば⑥へ進みます。
+
+### ⑥ 必要な依存ライブラリを入れる
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+⑤と⑥では、固定した依存ライブラリを取得するため通信します。`PS C:\...>`が戻れば⑦へ進みます。
+
+### ⑦ 鍵を作る前にselftest
+
+```powershell
+.\.venv\Scripts\python.exe .\flop_identity.py selftest
+```
+
+表示の中に次の3項目がすべてあることを確認します。下の3項目は確認用で、PowerShellへ貼りません。
+
+- `"status": "ok"`
+- `"dpapi_roundtrip": "ok"`
+- `"network_requests": "0"`
+
+1つでも違う場合は⑧へ進みません。
+
+### ⑧ DIDを1回だけ作る
+
+```powershell
+.\.venv\Scripts\python.exe .\flop_identity.py init
+```
+
+公開してよいもの:
+
+- `did:key:z6Mk...`から始まるDID
+- 16文字のfingerprint
+
+公開しないもの:
+
+- `%LOCALAPPDATA%\FlopAgent\Identity\seed.dpapi`
+- 秘密鍵、seed、復元フレーズ
+- Windowsユーザープロファイルのバックアップ
+
+すでにDIDがある場合、⑧は上書きせずエラーで停止します。削除や作り直しはせず、下の「5. 保存状態を確認」の`inspect`を実行してください。
+
+---
+
+ここから下は、ツールの動作・追加コマンド・Technocore側の注意点を詳しく知りたい方向けです。
+
 ## 最初に読むところ
 
 このツールが行うこと:
