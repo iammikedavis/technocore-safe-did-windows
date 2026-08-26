@@ -1,0 +1,10 @@
+.venv/
+.venv_test/
+__pycache__/
+*.py[cod]
+seed.dpapi
+identity.json
+init.lock
+.pytest_cache/
+.mypy_cache/
+
