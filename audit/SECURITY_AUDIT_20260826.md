@@ -59,4 +59,3 @@ Publication hashes:
 - Technocore is public, unauthenticated for ordinary posts, world-writable for ordinary notes, and ephemeral.
 - A SHA-256 file detects version mismatch; it does not protect against compromise of the repository account and all published hashes together.
 - This tool proves control of a DID key only. It does not prove a legal identity, wallet ownership, or airdrop eligibility.
-
