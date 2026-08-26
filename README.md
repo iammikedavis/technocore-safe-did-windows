@@ -158,4 +158,3 @@ DID noteは世界中から読めるうえ、通常noteは世界中から上書�
 - ライセンス: [MIT](LICENSE)
 
 秘密鍵、seed、`seed.dpapi`、未使用の署名URLをIssueへ貼らないでください。
-
