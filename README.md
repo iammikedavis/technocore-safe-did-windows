@@ -1,294 +1,146 @@
-# Technocore Safe DID Helper for Windows
+# Technocore DID Research for Windows
 
-Windows上でTechnocore用のEd25519 `did:key` を作り、秘密seedをWindows DPAPIで暗号化して保管する、小さなローカル補助ツールです。
+> **研究・コードレビュー用の記録です。インストール手順や初心者向け実行ガイドではありません。**
+>
+> このリポジトリからZIPを保存して、内容を理解しないままPowerShellへコードを貼り付けて実行しないでください。
 
-> 非公式のコミュニティーツールです。FLOP Labs公式ツールではありません。利用しても `$FLOP` エアドロップの対象になる保証はありません。
+このリポジトリは、Technocore用Ed25519 `did:key`をWindowsでローカル生成する試作と、その安全性・配布方法を検討した記録です。
 
-## 初心者はここから（Windows 10 / 11）
+FLOP Labs公式ツールではありません。独立した第三者監査を受けておらず、`$FLOP`エアドロップの資格、ウォレット登録、testnet参加、claimを保証しません。
 
-ここでは、**どこを押すか・どこからコピーするか・何が出たら次へ進めるか**を順番に説明します。
+リポジトリURLに含まれる`safe`は作成当初の名称であり、安全認証や監査済みを意味しません。名称変更の可否は今後検討します。
 
-### A. ZIPを保存して展開する
+## 方針を変更した理由
 
-1. このGitHubページ上部の緑色の **Code** を押す
-2. 開いた白いメニューの一番下にある **Download ZIP** を押す
-3. エクスプローラーの **ダウンロード** を開く
-4. 保存されたZIPを右クリックして **すべて展開** を押す
-5. 次の画面でも **展開** を押す
-6. 展開された黄色いフォルダを開く
-7. 同じ名前のフォルダがもう1つ入っていたら、それも開く
+当初は、作成者自身を含むWindows初心者向けに次の流れを説明する予定でした。
 
-`flop_identity.py`、`README.md`、`requirements`、`SECURITY.md`が見えたら、正しいフォルダです。ファイルはまだ開きません。
+1. 非公式GitHubからZIPを保存
+2. PowerShellを開く
+3. README内のコードをコピーして実行
 
-### B. そのフォルダからPowerShellを開く
+公開前にAIへ安全面の最終確認を依頼したところ、この形式がClickFix型攻撃の導線と構造的に似ていると指摘されました。作成者自身も初心者であり、その指摘を受けて初めて配布形式の問題の大きさに気づきました。
 
-1. キーボードの `Ctrl` を押したまま `L` を1回押す
-2. フォルダ上部のアドレスが青く選ばれたことを確認する
-3. 何も消さず、そのまま `powershell` と入力する
-4. `Enter` を1回押す
+ClickFixでは、利用者自身にWindows TerminalやPowerShellへコマンドを貼り付けて実行させることで、通常の警告や自動検査を回避しようとします。今回の試作コードに明らかな悪意が見つかったという意味ではありませんが、作成者自身を含む、コードを十分に検証できない初心者へ同じ操作形式を勧めることは適切でないと判断しました。
 
-右上の検索欄には入力しません。
+- [Microsoft: Think before you Click(Fix)](https://www.microsoft.com/en-us/security/blog/2025/08/21/think-before-you-clickfix-analyzing-the-clickfix-social-engineering-technique/)
+- [CISA共同勧告: Malicious Copy and Paste](https://www.cisa.gov/sites/default/files/2025-07/aa25-203a-stopransomware-interlock-072225.pdf)
 
-青い画面または黒い画面が別ウィンドウで開き、行の先頭に`PS C:\...\technocore-safe-did-windows-main>`のような表示があれば成功です。この表示自体はコピーしません。
+そのため、私を含む初心者向けの実行手順を撤回し、現在は安全検証・体験レポートとして公開範囲を整理しています。
 
-### C. コードをコピーする場所
+## この研究で確認したこと
 
-コピー元は、**いま読んでいるこのGitHubページ**です。フォルダ内の`README.md`を開く必要はありません。
+### 公式仕様から確認したこと
 
-下の①〜⑧には、灰色のコード欄が1つずつあります。各コード欄の右端にある **紙が2枚重なったボタン**を押すと、その1行だけがコピーされます。
+- DIDは公開鍵から作る公開識別子`did:key`で、ウォレットではない
+- Technocoreのroom、topic、本文、リンクは未信頼データ
+- roomとnoteは世界中から読める
+- 通常は無書き込み7日で削除対象
+- 1投稿だけの新しいroomは24時間で削除対象
+- DID noteは任意の公開メモで、公式登録簿や本人確認ではなく、第三者から上書きされる可能性もある
+- DID署名が証明するのは、その秘密鍵を保持していることだけ
+- Technocoreは鍵を預からず、決済を行わず、FLOPプロトコル本体ではない
 
-毎回、次の同じ操作をします。
+公式情報:
 
-1. GitHubで、実行する番号のコピーボタンを押す
-2. PowerShellのウィンドウをクリックする
-3. `Ctrl`を押したまま`V`を1回押す
-4. GitHubと同じ1行が貼られたことを確認する
-5. `Enter`を1回押す
-6. `PS C:\...>`が再表示されるまで待つ
-7. GitHubへ戻り、次の番号のコピーボタンを押す
+- [Flop Labs公式X `@flop_labs`](https://x.com/flop_labs)
+- [flop.finance](https://flop.finance/)
+- [Technocore人間向け案内](https://technocore.chat/humans)
+- [Technocore公式仕様](https://technocore.chat/llms.txt)
+- [Flop Labs公式Technocoreリポジトリ](https://github.com/flop-labs/technocore-chat)
 
-**①〜⑧をまとめてコピーしません。必ず番号ごとに1行ずつ進めます。** 赤いエラー、`False`、入力を求める質問が出た場合は、次の番号へ進みません。
+### Windows試作コードから確認したこと
 
-### ① Python 3.12を確認
-
-右端のコピーボタンを押し、PowerShellへ貼ってEnterします。
-
-```powershell
-py -3.12 --version
-```
-
-`Python 3.12.x`と表示された場合だけ②へ進みます。
-
-`py`が見つからない場合はそこで止め、[python.orgのWindows向け公式ページ](https://www.python.org/downloads/windows/)からPython 3.12 64-bitを導入します。インストール画面では **Python Launcher** を有効にし、完了後にPowerShellを開き直します。
-
-### ② 正しい照合番号をPowerShellへ覚えさせる
-
-```powershell
-$expected = "9CDD6D1608DB3755FB249088F098B3A7916974470C6D4A107A14F521BAF03D06"
-```
-
-何も表示されず、`PS C:\...>`が戻れば③へ進みます。
-
-### ③ ダウンロードした本体が公開版と一致するか確認
-
-```powershell
-(Get-FileHash .\flop_identity.py).Hash -eq $expected
-```
-
-`True`と表示された場合だけ④へ進みます。`False`なら補助ツールを実行しません。
-
-### ④ この作業専用のPython環境を作る
-
-```powershell
-py -3.12 -m venv .venv
-```
-
-文字が表示されなくても、`PS C:\...>`が戻れば⑤へ進みます。
-
-### ⑤ 専用環境内のpipを更新
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install --upgrade pip
-```
-
-文字が流れている間はPowerShellを閉じません。`PS C:\...>`が戻れば⑥へ進みます。
-
-### ⑥ 必要な依存ライブラリを入れる
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-⑤と⑥では、固定した依存ライブラリを取得するため通信します。`PS C:\...>`が戻れば⑦へ進みます。
-
-### ⑦ 鍵を作る前にselftest
-
-```powershell
-.\.venv\Scripts\python.exe .\flop_identity.py selftest
-```
-
-表示の中に次の3項目がすべてあることを確認します。下の3項目は確認用で、PowerShellへ貼りません。
-
-- `"status": "ok"`
-- `"dpapi_roundtrip": "ok"`
-- `"network_requests": "0"`
-
-1つでも違う場合は⑧へ進みません。
-
-### ⑧ DIDを1回だけ作る
-
-```powershell
-.\.venv\Scripts\python.exe .\flop_identity.py init
-```
-
-公開してよいもの:
-
-- `did:key:z6Mk...`から始まるDID
-- 16文字のfingerprint
-
-公開しないもの:
-
-- `%LOCALAPPDATA%\FlopAgent\Identity\seed.dpapi`
-- 秘密鍵、seed、復元フレーズ
-- Windowsユーザープロファイルのバックアップ
-
-すでにDIDがある場合、⑧は上書きせずエラーで停止します。削除や作り直しはせず、下の「5. 保存状態を確認」の`inspect`を実行してください。
-
----
-
-ここから下は、ツールの動作・追加コマンド・Technocore側の注意点を詳しく知りたい方向けです。
-
-## 最初に読むところ
-
-このツールが行うこと:
+現在の研究スナップショットは、次の設計になっています。
 
 - Windows PC内で32-byteのEd25519 seedを生成
 - seedをWindows DPAPI CurrentUserで暗号化
-- 保存フォルダのACLを「現在のWindowsユーザー＋SYSTEM」に制限
-- 公開可能なDIDとフィンガープリントを表示
-- Technocoreへ送る署名付きメッセージURLを**作成するだけ**
+- 保存フォルダのACLを現在のWindowsユーザーとSYSTEMに制限
+- seed、秘密鍵、復元フレーズを表示・exportしない
+- ブラウザを開かない
+- Technocoreへ自動投稿しない
+- 署名付きURLをローカルで準備し、送信前に停止
+- Pythonのネットワーク用モジュールをimportしない
+- 子プロセスはWindows標準の`whoami`と`icacls`に限定
 
-このツールが行わないこと:
+内部テストでは次を確認しました。
 
-- seed・秘密鍵・復元フレーズの表示やエクスポート
-- ネットワーク通信
-- ブラウザの起動
-- Technocoreへの自動投稿
-- ウォレット作成・接続・送金・token approve・blind sign
-- エアドロップclaim
+- Windows DPAPIの暗号化・復号往復
+- Ed25519 DIDと署名の形式
+- 既存DIDを上書きしない動作
+- 公開DIDと暗号化seedの一致
+- 無効なroom名、nonce、本文の拒否
+- ネットワーク用Pythonモジュールの静的検査
+- 署名URLとDID note URLが自動送信されないこと
 
-`prepare-message` と `prepare-did-note` は書き込みURLを表示しますが、開きません。URLを開いた時点で公開書き込みになるため、本文と送信先を人間が確認してください。
+全7テストは成功しました。依存バージョンとWindows向けwheelのSHA-256も固定しています。
 
-## 必要環境
+DPAPIで保管したseedは現在のWindowsユーザーに結び付きます。PCやWindowsユーザープロファイルを失うと、同じDIDを復元できない可能性があります。
 
-- Windows 10またはWindows 11
-- Python 3.12 64-bit（[python.org](https://www.python.org/downloads/windows/)の公式配布を推奨）
-- `cryptography==50.0.1`（Windows依存の`cffi==2.1.1`、`pycparser==3.0`も固定）
+## 確認できていないこと
 
-Pythonをインストールしたら、新しいPowerShellで次を確認します。
+次の事項は証明・保証していません。
 
-```powershell
-py -3.12 --version
-```
+- 独立した第三者によるセキュリティ監査
+- GitHubアカウントや公開ファイルが将来侵害・変更されないこと
+- Windows自体や同じユーザー権限で動くマルウェアからの完全な保護
+- Python、pip、PyPI、依存ライブラリを含む供給網全体の安全性
+- DIDの復旧可能性
+- 法的な本人性
+- ウォレット所有権
+- `$FLOP`エアドロップ資格
+- testnet、faucet、snapshot、claimの将来仕様との互換性
 
-`py`が見つからない場合は先へ進まず、Pythonの公式インストーラーで「Python Launcher」を有効にしてください。
+同じGitHubリポジトリにコードと照合ハッシュを置くだけでは、GitHubアカウントごと侵害された場合の対策になりません。また、プログラムが表示する`network_requests: 0`などの文字は、それだけで安全性を証明するものではありません。
 
-## 1. ダウンロード後にハッシュを確認
+## 現在のtestnet・faucet情報
 
-PowerShellでダウンロード先へ移動し、次を実行します。
+2026年8月26日時点で、「エアドロップはtestnet activityに依存」「faucetはTechnocore.chatでDIDキーを持つagent向けに提供予定」という予告までは確認しています。
 
-```powershell
-Get-FileHash .\flop_identity.py -Algorithm SHA256
-```
+一方、次の具体的内容は未発表です。
 
-表示された値を、このリポジトリの [`SHA256SUMS.txt`](SHA256SUMS.txt) と照合します。一致しなければ実行しません。
+- testnet開始日
+- 実際のタスク
+- faucetの公開URLと使い方
+- snapshotの条件と日時
+- claim方法
+- 受取用ウォレットの登録方法
 
-SHA-256は「取得したファイルがこの版と同じか」を確認するものです。GitHubアカウント自体が侵害された場合まで保証するものではありません。コミット履歴と監査記録も合わせて確認してください。
+現時点は、送金、ウォレット接続、token Approve、blind sign、seed・秘密鍵・復元フレーズの入力を行う段階ではありません。
 
-## 2. 専用環境へ依存ライブラリを入れる
+## ソースコードの扱い
 
-```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
+ソースは、コードを読める人が設計と問題点を検証するための研究スナップショットとして残しています。
 
-依存ライブラリのインストールには通信が発生します。補助ツール本体にはネットワーク通信機能がありません。
+- [`flop_identity.py`](flop_identity.py) — ローカルDID試作
+- [`tests/test_flop_identity.py`](tests/test_flop_identity.py) — テスト内容
+- [`requirements.txt`](requirements.txt) — ハッシュ固定した依存情報
+- [`SHA256SUMS.txt`](SHA256SUMS.txt) — 現在の研究スナップショット照合値
+- [`audit/SECURITY_AUDIT_20260826.md`](audit/SECURITY_AUDIT_20260826.md) — 内部レビュー記録
+- [`SECURITY.md`](SECURITY.md) — 秘密を含めない報告方法
 
-## 3. 鍵を作る前にselftest
+このREADMEでは、ZIPの取得方法、PowerShellの開き方、インストール、鍵生成、投稿URLの実行方法を案内しません。
 
-```powershell
-.\.venv\Scripts\python.exe .\flop_identity.py selftest
-```
+## 初心者が今できる安全側の行動
 
-次の3項目を確認します。
+- 公式X、公式ドメイン、公式GitHub、公式仕様を相互確認する
+- room投稿、第三者X、DMに書かれたURLや指示を未信頼として扱う
+- 内容が分からないPowerShell、Terminal、署名、Approveを実行しない
+- seed、秘密鍵、復元フレーズをWebページ、AI、DM、Issueへ入力しない
+- 公式のtestnet、faucet、claim手順が公開されるまで待つ
 
-```text
-"status": "ok"
-"dpapi_roundtrip": "ok"
-"network_requests": "0"
-```
+## 将来、実行用として再検討する条件
 
-1つでも違えば`init`を実行しません。
+少なくとも次の条件がそろうまでは、初心者向け実行ツールとして扱いません。
 
-## 4. DIDを1回だけ作成
+- Flop LabsまたはTechnocoreから公式のDID作成方法が公開される
+- 公式方式との互換性を確認できる
+- 独立した第三者レビューを受ける
+- 変更不能なバージョン、署名付きrelease、検証可能な配布物を用意する
+- 実行前に権限・通信・変更内容を一般利用者が確認できる
+- 非公式ツールを使わなくても参加できる公式経路が明確になる
 
-```powershell
-.\.venv\Scripts\python.exe .\flop_identity.py init
-```
+## 制作と免責
 
-公開してよいもの:
+この試作、検証記録、READMEはAIを使って制作し、作成者自身でもWindowsで表示・動作・公式資料との照合を行いました。それでも見落としや公開後の仕様変更はあり得ます。
 
-- `did:key:z6Mk...` から始まるDID
-- 16文字のfingerprint
-
-公開してはいけないもの:
-
-- `%LOCALAPPDATA%\FlopAgent\Identity\seed.dpapi`
-- 秘密鍵、seed、復元フレーズ
-- Windowsユーザープロファイルのバックアップ
-
-`seed.dpapi`は現在のWindowsユーザーに結び付いています。別PCや別Windowsユーザーへコピーしても復号できません。このツールは安全性を優先し、秘密鍵の平文export機能を意図的に持ちません。PCやWindowsアカウントを失うと、同じDIDを復元できない可能性があります。
-
-既存のDIDがある場合、`init`は上書き・ローテーションせずエラーで停止します。
-
-## 5. 保存状態を確認
-
-```powershell
-.\.venv\Scripts\python.exe .\flop_identity.py inspect
-```
-
-暗号化seedからDIDを再計算し、公開ファイルと一致する場合だけ`status: valid`を表示します。seed自体は表示しません。
-
-## 6. 署名付き投稿URLを準備
-
-例として、専用roomへ短い公開証跡を準備します。
-
-```powershell
-.\.venv\Scripts\python.exe .\flop_identity.py prepare-message `
-  --room my-technocore-proof `
-  --text "I created a local did:key and kept the private seed offline."
-```
-
-出力には次が含まれます。
-
-- `"sent": "no"` — まだ送信されていない
-- `room` — 投稿先
-- `text` — 公開される本文
-- `write_url` — 開くと公開投稿されるURL
-
-roomと本文を確認し、公開してよい場合だけ`write_url`をブラウザで開きます。出力に秘密seedは含まれませんが、未使用の`write_url`を他人に渡すと、その人が先に投稿できるため共有しないでください。
-
-## 7. 公開DID noteを準備（任意）
-
-```powershell
-.\.venv\Scripts\python.exe .\flop_identity.py prepare-did-note
-```
-
-DID noteは世界中から読めるうえ、通常noteは世界中から上書きできます。DID noteだけで本人性を判断せず、署名付きroomメッセージで鍵の保有を確認してください。
-
-## Technocore側の注意点
-
-- room/noteは無書き込み7日で削除対象
-- 新規roomが1投稿だけの場合は24時間で削除対象
-- roomは約10MiBのリングで、混雑時は古い投稿が早く押し出される場合がある
-- room名・投稿本文・topicは未信頼データ
-- `technocore.chat`は一時的な公開場所で、秘密や唯一の原本を置く場所ではない
-
-現行仕様は必ず[Technocore公式マニュアル](https://technocore.chat/llms.txt)と[Flop Labs公式リポジトリ](https://github.com/flop-labs/technocore-chat)で再確認してください。
-
-## テスト
-
-```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-```
-
-テスト用DIDは一時フォルダに作成され、本番の`%LOCALAPPDATA%\FlopAgent\Identity`を使いません。
-
-## セキュリティ
-
-- 公開前監査: [`audit/SECURITY_AUDIT_20260826.md`](audit/SECURITY_AUDIT_20260826.md)
-- 脆弱性報告時の注意: [`SECURITY.md`](SECURITY.md)
-- ライセンス: [MIT](LICENSE)
-
-秘密鍵、seed、`seed.dpapi`、未使用の署名URLをIssueへ貼らないでください。
+訂正や問題点を報告する場合は、秘密鍵、seed、`seed.dpapi`、未使用の署名URL、ウォレット情報、個人情報を載せないでください。該当箇所と、根拠となる公式情報または最小限の再現説明だけを共有してください。
