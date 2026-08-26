@@ -7,4 +7,3 @@ identity.json
 init.lock
 .pytest_cache/
 .mypy_cache/
-
